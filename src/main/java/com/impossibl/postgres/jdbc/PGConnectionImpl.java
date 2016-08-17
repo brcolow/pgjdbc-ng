@@ -141,7 +141,6 @@ public class PGConnectionImpl extends BasicContext implements PGConnection {
 
     Protocol protocol;
     List<WeakReference<PGStatement>> statements;
-    Housekeeper.Ref housekeeper;
     StackTraceElement[] allocationStackTrace;
 
     public Cleanup(Protocol protocol, List<WeakReference<PGStatement>> statements) {
@@ -163,11 +162,17 @@ public class PGConnectionImpl extends BasicContext implements PGConnection {
     @Override
     public void run() {
 
-      protocol.shutdown();
+      try {
 
-      closeStatements(statements);
+        protocol.shutdown();
 
-      housekeeper.release();
+        closeStatements(statements);
+
+      }
+      catch (Throwable ignore) {
+        // Ignore any cleanup exceptions...
+      }
+
     }
 
   }
